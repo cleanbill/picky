@@ -22,7 +22,6 @@ const ImageGridItem: React.FC<ImageGridItemProps> = ({ itemPath, name, selected,
     }
     return (<button onClick={() => selection()} className={highlight ? "bg-green-500 bg-red p-4 rounded-lg shadow-sm flex flex-col items-center" : "p-4 rounded-lg shadow-sm flex flex-col items-center"}>
         <Image
-            // Assuming images are served from the public/images directory
             src={`/images/${itemPath}`}
             alt={name}
             width={300}
