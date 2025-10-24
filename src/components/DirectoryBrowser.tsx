@@ -8,6 +8,7 @@ import DirectoryNav from './DirectoryNav';
 import Folders from './Folders';
 import Images from './Images';
 import { getUrlPath, moveFiles } from '@/utils/directory';
+import FullScreenImageGallery from './FullScreenImageGallery';
 
 export default function DirectoryBrowser() {
   // Function to safely extract 'path' parameter from browser URL
@@ -20,6 +21,14 @@ export default function DirectoryBrowser() {
     return '';
   }, []);
 
+  const getViewFromUrl = useCallback((): 'browser' | 'gallery' => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('view') === 'gallery' ? 'gallery' : 'browser';
+    }
+    return 'browser';
+  }, []);
+
   // 1. STATE MANAGEMENT
   // currentPath is now managed via state and initialized from the URL
   const [currentPath, setCurrentPath] = useState(getPathFromUrl);
@@ -27,6 +36,21 @@ export default function DirectoryBrowser() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [message, setMessage] = useState<Message | null>(null);
+
+  // CORE NAVIGATION STATE: Manages which view is currently active
+  // 1. Initializing viewMode state from the URL
+  const [viewMode, setViewMode] = useState<'browser' | 'gallery'>(getViewFromUrl);  // --- View Mode Handlers (Gallery Navigation) ---
+
+  const enterGallery = () => {
+    if (images.length > 0) {
+      setViewMode('gallery');
+      setCurrentPath(getUrlPath(currentPath, 'gallery'));
+    }
+  };
+  const exitGallery = () => {
+    setViewMode('browser')
+    setCurrentPath(getUrlPath(currentPath, 'browser'));
+  };
 
   // 2. DATA FETCHING BASED ON STATE PATH
   const fetchData = useCallback(async (path: string) => {
@@ -74,6 +98,7 @@ export default function DirectoryBrowser() {
     // Set up popstate listener for back/forward button support
     const handlePopState = () => {
       setCurrentPath(getPathFromUrl());
+      setViewMode(getViewFromUrl());
     };
 
     if (typeof window !== 'undefined') {
@@ -90,7 +115,7 @@ export default function DirectoryBrowser() {
   const navigateTo = (folderName: string) => {
     // Construct new path: if at root (''), new path is 'folderName'. Otherwise 'current/folderName'
     const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
-    setCurrentPath(getUrlPath(newPath));  // This triggers the useEffect/fetchData
+    setCurrentPath(getUrlPath(newPath, viewMode));  // This triggers the useEffect/fetchData
   };
 
   const navigateUp = () => {
@@ -98,7 +123,7 @@ export default function DirectoryBrowser() {
 
     // Find the last slash index and take the substring up to it. 
     const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-    setCurrentPath(getUrlPath(parentPath)); // If it's a top-level folder, this returns '', which is root
+    setCurrentPath(getUrlPath(parentPath, viewMode)); // If it's a top-level folder, this returns '', which is root
   };
 
   // --- File Manipulation and Selection ---
@@ -127,15 +152,33 @@ export default function DirectoryBrowser() {
   const images = contents.filter(item => item.isImage).sort((a, b) => a.name.localeCompare(b.name));
   const selected = contents.filter(item => item.selected);
 
+  const isGalleryDisabled = images.length === 0;
+
+  // 4. CONDITIONAL RENDERING
+  if (viewMode === 'gallery') {
+    return (
+      <FullScreenImageGallery
+        selected={images}
+        toggle={toggleFn}
+        exitGallery={exitGallery}
+      />
+    );
+  }
+
+
   if (loading) return <div className="text-center p-8 text-xl font-medium text-gray-600">Loading directory...</div>;
 
   return (
     <div className="p-2 max-w-6xl mx-auto font-sans pr-10">
-      <h1 className="text-3xl font-extrabold mb-6 text-gray-800 border-b pb-2">File Browser</h1>
+      <h1 className="text-3xl font-extrabold mb-6 text-gray-800 border-b pb-2">Picture Browser</h1>
 
       <MessageDisplay message={message}></MessageDisplay>
 
-      <Selected selected={selected} move={move}></Selected>
+      <Selected
+        selected={selected}
+        move={move}
+        enterGallery={enterGallery}
+      ></Selected>
 
       <DirectoryNav currentPath={currentPath} navigateUp={navigateUp}></DirectoryNav>
 
@@ -151,7 +194,11 @@ export default function DirectoryBrowser() {
         </div>
       )}
 
-      <Selected selected={selected} move={move}></Selected>
+      <Selected
+        selected={selected}
+        move={move}
+        enterGallery={enterGallery}
+      ></Selected>
 
     </div>
   );

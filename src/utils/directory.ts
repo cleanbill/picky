@@ -1,20 +1,31 @@
 import { Message } from "@/types";
 
 // Builds a new URL and updates history and state
-const getUrlPath = (newPath: string) => {
+const getUrlPath = (newPath: string, currentViewMode: 'browser' | 'gallery') => {
     let newUrl = window.location.pathname;
+    const params = new URLSearchParams();
 
+    // Set path parameter
     if (newPath) {
-        newUrl += `?path=${encodeURIComponent(newPath)}`;
+        params.set('path', newPath);
     }
 
-    // Use native History API to change URL without full reload (mimics router.push)
+    // Set view parameter only if it's 'gallery'
+    if (currentViewMode === 'gallery') {
+        params.set('view', 'gallery');
+    }
+
+    const search = params.toString();
+    if (search) {
+        newUrl += `?${search}`;
+    }
+
     if (typeof window !== 'undefined') {
         window.history.pushState(null, '', newUrl);
     }
+    return newPath;
+}
 
-    return newPath
-};
 
 const moveFiles = async (paths: string[], currentPath: string): Promise<Message> => {
     try {
