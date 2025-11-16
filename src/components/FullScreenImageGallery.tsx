@@ -174,12 +174,13 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
                         src={imageUrl}
                         alt={`Preview of ${currentItem.name}`}
                         className="object-contain max-w-full max-h-full rounded-xl shadow-2xl transition-transform duration-300"
-                        style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '750px' }}
+                        style={{ width: '100%', height: '100%', maxWidth: '1200px', maxHeight: '700px' }}
                         // Simple fallback if placeholder service fails
                         onError={(e) => {
                             e.currentTarget.onerror = null;
                             e.currentTarget.src = `https://placehold.co/1200x800/888888/ffffff?text=Image+Load+Failed`;
                         }}
+                        title={imageUrl}
                     />
                     {/* File Name Caption */}
                     <div className="mt-4 p-2 bg-gray-800 rounded-lg text-white text-lg font-mono">
