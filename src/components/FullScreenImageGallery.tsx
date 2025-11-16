@@ -65,7 +65,7 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
     if (items.length === 0) {
         return (
             <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col z-50 p-4 font-sans items-center justify-center">
-                <p className="text-2xl text-white">No images found in this directory.</p>
+                <div className="text-2xl text-white">No images found in this directory.</div>
                 <button onClick={exitGallery} className="mt-6 px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-xl hover:bg-red-700 transition-colors">
                     Back to Browser
                 </button>
