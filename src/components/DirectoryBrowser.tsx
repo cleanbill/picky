@@ -37,6 +37,13 @@ export default function DirectoryBrowser() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState<Message | null>(null);
 
+  // --- Rendering Logic ---
+  const folders = contents.filter(item => item.isDirectory).sort((a, b) => a.name.localeCompare(b.name));
+  const images = contents.filter(item => item.isImage).sort((a, b) => a.name.localeCompare(b.name));
+  const selected = contents.filter(item => item.selected);
+
+  const isGalleryDisabled = images.length === 0;
+
   // CORE NAVIGATION STATE: Manages which view is currently active
   // 1. Initializing viewMode state from the URL
   const [viewMode, setViewMode] = useState<'browser' | 'gallery'>(getViewFromUrl);  // --- View Mode Handlers (Gallery Navigation) ---
@@ -90,8 +97,39 @@ export default function DirectoryBrowser() {
     }
   }, []); // DEPENDENCY FIX: contents is removed, breaking the infinite loop.
 
+
+  const navigateTo = (folderName: string) => {
+    // Construct new path: if at root (''), new path is 'folderName'. Otherwise 'current/folderName'
+    const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+    setCurrentPath(getUrlPath(newPath, viewMode));  // This triggers the useEffect/fetchData
+  };
+
+  const navigateUp = () => {
+    if (currentPath === '') return;
+
+    // Find the last slash index and take the substring up to it. 
+    const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+    setCurrentPath(getUrlPath(parentPath, viewMode)); // If it's a top-level folder, this returns '', which is root
+  };
+
+
   // 3. useEffect triggers when the path state changes
   useEffect(() => {
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        navigateUp();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        enterGallery();
+      }
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+
     // Fetch data whenever currentPath state updates (via navigation or initial load)
     fetchData(currentPath);
 
@@ -108,23 +146,11 @@ export default function DirectoryBrowser() {
     return () => {
       if (typeof window !== 'undefined') {
         window.removeEventListener('popstate', handlePopState);
+        window.removeEventListener('keydown', handleKeyDown);
       }
     };
   }, [currentPath, fetchData, getPathFromUrl]);
 
-  const navigateTo = (folderName: string) => {
-    // Construct new path: if at root (''), new path is 'folderName'. Otherwise 'current/folderName'
-    const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
-    setCurrentPath(getUrlPath(newPath, viewMode));  // This triggers the useEffect/fetchData
-  };
-
-  const navigateUp = () => {
-    if (currentPath === '') return;
-
-    // Find the last slash index and take the substring up to it. 
-    const parentPath = currentPath.substring(0, currentPath.lastIndexOf('/'));
-    setCurrentPath(getUrlPath(parentPath, viewMode)); // If it's a top-level folder, this returns '', which is root
-  };
 
   // --- File Manipulation and Selection ---
   const toggleFn = (path: string) => () => {
@@ -146,19 +172,12 @@ export default function DirectoryBrowser() {
     }
   }
 
-  // --- Rendering Logic ---
-
-  const folders = contents.filter(item => item.isDirectory).sort((a, b) => a.name.localeCompare(b.name));
-  const images = contents.filter(item => item.isImage).sort((a, b) => a.name.localeCompare(b.name));
-  const selected = contents.filter(item => item.selected);
-
-  const isGalleryDisabled = images.length === 0;
 
   // 4. CONDITIONAL RENDERING
   if (viewMode === 'gallery') {
     return (
       <FullScreenImageGallery
-        selected={images}
+        images={images}
         toggle={toggleFn}
         exitGallery={exitGallery}
       />

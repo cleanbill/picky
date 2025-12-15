@@ -11,10 +11,14 @@ type DirectoryItem = {
     selected: boolean;
 };
 
-const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { selected: DirectoryItem[], toggle: (path: string) => () => void, exitGallery: () => void }) => {
+const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: DirectoryItem[], toggle: (path: string) => () => void, exitGallery: () => void }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    if (!images || images.length < 1) {
+        exitGallery();
+        return;
+    }
 
-    const currentItem = items[currentIndex];
+    const currentItem = images[currentIndex];
 
     const imageUrl = currentItem ? '/images/' + currentItem.path : '';
 
@@ -22,17 +26,17 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
     const handleToggle = useCallback((e: React.MouseEvent | KeyboardEvent) => {
         e.stopPropagation();
         // Access the item based on the latest index
-        if (items[currentIndex]) {
-            toggle(items[currentIndex].path)();
+        if (images[currentIndex]) {
+            toggle(images[currentIndex].path)();
         }
-    }, [currentIndex, items, toggle]);
+    }, [currentIndex, images, toggle]);
 
 
     const navigate = (direction: 'prev' | 'next') => {
         if (direction === 'next') {
-            setCurrentIndex((prev) => (prev + 1) % items.length);
+            setCurrentIndex((prev) => (prev + 1) % images.length);
         } else {
-            setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+            setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
         }
     };
 
@@ -61,10 +65,10 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
         };
     }, [navigate, handleToggle, exitGallery]);
 
-    // If items (now gallery images) are empty, show back button message
-    if (items.length === 0) {
+    // If images (now gallery images) are empty, show back button message
+    if (images.length === 0) {
         return (
-            <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col z-50 p-4 font-sans items-center justify-center">
+            <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col z-50 p-4 font-sans images-center justify-center">
                 <div className="text-2xl text-white">No images found in this directory.</div>
                 <button onClick={exitGallery} className="mt-6 px-6 py-3 bg-red-600 text-white font-semibold rounded-lg shadow-xl hover:bg-red-700 transition-colors">
                     Back to Browser
@@ -78,12 +82,12 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
         <div className="fixed inset-0 bg-gray-900 bg-opacity-95 flex flex-col z-50 p-4 font-sans">
 
             {/* Header and Controls */}
-            <div className="flex justify-between items-center text-white p-3 mb-4 bg-gray-800 rounded-lg shadow-xl sticky top-0">
+            <div className="flex justify-between images-center text-white p-3 mb-4 bg-gray-800 rounded-lg shadow-xl sticky top-0">
 
                 {/* Back Button */}
                 <button
                     onClick={exitGallery}
-                    className="flex items-center text-m w-72 font-semibold px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors"
+                    className="flex images-center text-m w-72 font-semibold px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -94,7 +98,7 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
                 {/* THUMBNAIL PREVIEW BAR */}
                 <div className="w-full text-center overflow-x-auto py-2 mb-4 bg-gray-800 rounded-lg shadow-inner">
                     <div className="inline-flex space-x-2 px-3">
-                        {items.map((item, index) => (
+                        {images.map((item, index) => (
                             <button
                                 key={item.path}
                                 onClick={() => setCurrentIndex(index)}
@@ -126,13 +130,13 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
                     </div>
                 </div>
                 {/* <span className="text-xs font-mono px-4 py-1 bg-gray-700 rounded">
-                    {currentIndex + 1} / {items.length}
+                    {currentIndex + 1} / {images.length}
                 </span> */}
 
                 {/* Selection Toggle Button */}
                 <button
                     onClick={handleToggle}
-                    className={`flex items-center p-2 px-4 w-64 rounded-lg transition-colors shadow-md ${currentItem.selected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'}`}
+                    className={`flex images-center p-2 px-4 w-64 rounded-lg transition-colors shadow-md ${currentItem.selected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'}`}
                 >
                     <span className="text-sm font-bold mr-2">
                         {currentItem.selected ? 'Deselect (Space)' : 'Select (Space)'}
@@ -150,7 +154,7 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
 
 
             {/* Main Image View */}
-            <div className={currentItem.selected ? "bg-green-300 max-w-full max-h-full flex flex-col items-center justify-center p-4" : "max-w-full max-h-full flex flex-col items-center justify-center p-4"}>
+            <div className={currentItem.selected ? "bg-green-300 max-w-full max-h-full flex flex-col images-center justify-center p-4" : "max-w-full max-h-full flex flex-col images-center justify-center p-4"}>
 
                 {/* Navigation Buttons */}
                 <button
@@ -169,7 +173,7 @@ const FullScreenImageGallery = ({ selected: items, toggle, exitGallery }: { sele
                 </button>
 
                 {/* Image Content (Dynamic Placeholder) */}
-                <button onClick={handleToggle} className="max-w-full max-h-full flex flex-col items-center justify-center p-4">
+                <button onClick={handleToggle} className="max-w-full max-h-full flex flex-col images-center justify-center p-4">
                     <img
                         src={imageUrl}
                         alt={`Preview of ${currentItem.name}`}
