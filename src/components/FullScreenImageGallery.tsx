@@ -136,7 +136,7 @@ const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: Direc
                 {/* Selection Toggle Button */}
                 <button
                     onClick={handleToggle}
-                    className={`flex images-center p-2 px-4 w-64 rounded-lg transition-colors shadow-md ${currentItem.selected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'}`}
+                    className={`flex images-center p-2 px-4 w-64 h-10 ml-3 rounded-lg transition-colors shadow-md ${currentItem.selected ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-600'}`}
                 >
                     <span className="text-sm font-bold mr-2">
                         {currentItem.selected ? 'Deselect (Space)' : 'Select (Space)'}
