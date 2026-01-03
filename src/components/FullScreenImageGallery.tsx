@@ -11,7 +11,8 @@ type DirectoryItem = {
     selected: boolean;
 };
 
-const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: DirectoryItem[], toggle: (path: string) => () => void, exitGallery: () => void }) => {
+const FullScreenImageGallery = ({ images, toggle, exitGallery, move }: { images: DirectoryItem[], toggle: (path: string) => () => void, exitGallery: () => void, move: () => void }) => {
+    const [selected, setSelected] = useState(images.filter((fi: DirectoryItem) => fi.selected).length > 0);
     const [currentIndex, setCurrentIndex] = useState(0);
     if (!images || images.length < 1) {
         exitGallery();
@@ -39,6 +40,9 @@ const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: Direc
             setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
         }
     };
+    useEffect(() => {
+        setSelected(images.filter((fi: DirectoryItem) => fi.selected).length > 0);
+    }, [images]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -87,7 +91,7 @@ const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: Direc
                 {/* Back Button */}
                 <button
                     onClick={exitGallery}
-                    className="flex images-center text-m w-72 font-semibold px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors"
+                    className="flex images-center h-10 pt-2 text-m w-72 font-semibold px-3 py-1 rounded-lg hover:bg-gray-700 transition-colors"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6 mr-2">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
@@ -128,6 +132,17 @@ const FullScreenImageGallery = ({ images, toggle, exitGallery }: { images: Direc
                             </button>
                         ))}
                     </div>
+
+                    {selected &&
+                        <div className="flex space-x-4">
+                            <button
+                                onClick={move}
+                                className='flex-1 mt-3 px-4 py-2 bg-orange-400 text-black font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors'
+                            >
+                                Click to move the Files
+                            </button>
+
+                        </div>}
                 </div>
                 {/* <span className="text-xs font-mono px-4 py-1 bg-gray-700 rounded">
                     {currentIndex + 1} / {images.length}

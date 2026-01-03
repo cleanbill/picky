@@ -117,9 +117,9 @@ export default function DirectoryBrowser() {
   useEffect(() => {
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowUp') {
+      if (e.key === 'ArrowRight') {
         e.preventDefault();
-        navigateUp();
+        setViewMode('gallery');
       } else if (e.key === ' ') {
         e.preventDefault();
         enterGallery();
@@ -178,6 +178,7 @@ export default function DirectoryBrowser() {
     return (
       <FullScreenImageGallery
         images={images}
+        move={move}
         toggle={toggleFn}
         exitGallery={exitGallery}
       />
@@ -200,9 +201,6 @@ export default function DirectoryBrowser() {
       ></Selected>
 
       <DirectoryNav currentPath={currentPath} navigateUp={navigateUp}></DirectoryNav>
-
-      {selected.length > 0 && <button onClick={move} className="px-3 py-1 w-full bg-orange-300 text-center text-gray-800 font-semibold rounded-lg hover:bg-orange-400 transition-colors "
-      > Move the files</button>}
 
       {error && <div className="p-4 mb-4 text-red-600 bg-red-100 border border-red-300 rounded-lg font-medium">Error: {error}</div>}
 

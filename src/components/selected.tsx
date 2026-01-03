@@ -23,7 +23,7 @@ const Selected = ({ selected, move, enterGallery }: Props) => (
                 <div className="flex space-x-4">
                     <button
                         onClick={move}
-                        className='flex-1 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors'
+                        className='flex-1 px-4 py-2 bg-orange-400 text-black font-semibold rounded-lg shadow-md hover:bg-blue-700 transition-colors'
                     >
                         Click to Move {selected.length} Files
                     </button>
